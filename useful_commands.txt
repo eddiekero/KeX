@@ -1,0 +1,17 @@
+python train.py -s tandt_db\tandt\train\ 
+--eval 
+--iterations 1500 
+--optimizer_type sparse_adam 
+--save_iterations 150 300 450 600 750 900 1050 1200 1350 1500
+
+
+python render.py 
+-m output\c64c886b-1 
+--skip_train 
+--iteration 150
+
+Note: After rendering at different iterations you can run metrics once and it will compute scores for each subfolder of rendered images 
+
+python metrics.py 
+-m output\c64c886b-1 
+
