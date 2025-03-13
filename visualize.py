@@ -1,8 +1,10 @@
 import json
 import matplotlib.pyplot as plt
+import plyextract
+
 
 # Read JSON data from a file
-with open("output/train1500baseline/results.json", "r") as file:
+with open("output/train4000/results.json", "r") as file:
     data = json.load(file)
 
 # Extract X and Y values
@@ -14,12 +16,19 @@ sorted_indices = sorted(range(len(x_values)), key=lambda i: x_values[i])
 x_values = [x_values[i] for i in sorted_indices]
 y_values = [y_values[i] for i in sorted_indices]
 
+
+folder_path = "output\\train4000\\point_cloud"  # Change this to your folder path
+vertex_counts = plyextract.process_ply_files_recursively(folder_path)
+for idx, x in enumerate(x_values):
+    x_values[idx] = vertex_counts[str(x)][0][1]
+
+
 # Plot the data
 plt.figure(figsize=(8, 5))
 plt.plot(x_values, y_values, marker='o', linestyle='-', color='b', label='PSNR')
-plt.xlabel("#Iterations")
+plt.xlabel("#Gaussians")
 plt.ylabel("PSNR")
-plt.title("PSNR to Iterations")
+plt.title("Train4000")
 plt.legend()
 plt.grid(True)
 plt.show()
