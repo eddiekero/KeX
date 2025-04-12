@@ -23,7 +23,15 @@ def process_ply_files_recursively(folder_path):
                     vertex_counts[iteration].append((file_name, vertex_count))  # Store file name and vertex count
     return vertex_counts
 
+
+
 # Example usage
-folder_path = "output\\train4000\\point_cloud"  # Change this to your folder path
-result = process_ply_files_recursively(folder_path)
-print(result)
+#ply_file_path = "your_file.ply"
+##vertex_count = get_vertex_count(ply_file_path)
+#print("Vertex count:", vertex_count)
+
+
+# Example usage
+#folder_path = "output\\train4000\\point_cloud"  # Change this to your folder path
+#result = process_ply_files_recursively(folder_path)
+#print(result)

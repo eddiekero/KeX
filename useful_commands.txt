@@ -1,17 +1,23 @@
-python train.py -s tandt_db\tandt\train\ 
+python train.py -s tandt_db\tandt\truck\ 
 --eval 
---iterations 4000 
+--iterations 700 
 --optimizer_type sparse_adam 
+--checkpoint_iterations 700 
+
 --save_iterations 1000 2000 3000 4000
+
+python train.py 
+--start_checkpoint output/checkpoints/chkpnt300.pth
+
 
 
 python render.py 
--m output\c64c886b-1 
+-m output\truck4000 
 --skip_train 
---iteration 150
+--iteration 1000
 
 Note: After rendering at different iterations you can run metrics once and it will compute scores for each subfolder of rendered images 
 
 python metrics.py 
--m output\c64c886b-1 
+-m output\truck4000
 
