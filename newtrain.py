@@ -9,7 +9,8 @@ import pickle
 
 iteration_step = 100
 max_iteration = 200
-
+del_last_checkpoint = True
+del_final_model = True
 
 count_and_psnr = {}
 
@@ -66,7 +67,8 @@ for scene_dir in scenes:
                         "--iterations", "%d" % (iter+iteration_step), 
                         "--checkpoint_iterations", "%d" % (iter+iteration_step),])
         
-        shutil.rmtree("output/whatever%d/" % (checkpoint-1))
+        if (del_last_checkpoint):
+            shutil.rmtree("output/whatever%d/" % (checkpoint-1))
         
         subprocess.run([sys.executable,
                         "render.py", 
@@ -90,7 +92,8 @@ for scene_dir in scenes:
 
     print(f"{scene_dir}: count_and_psnr = {count_and_psnr[scene_dir]}")
     
-    shutil.rmtree("output/whatever%d/" % (checkpoint-1))
+    if (del_last_checkpoint):
+        shutil.rmtree("output/whatever%d/" % (checkpoint-1))
 
 
 
