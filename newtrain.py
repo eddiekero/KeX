@@ -4,10 +4,11 @@ import json
 import plyextract
 import shutil
 
+import pickle
 
 
-iteration_step = 500
-max_iteration = 1000
+iteration_step = 100
+max_iteration = 200
 
 
 count_and_psnr = {}
@@ -38,14 +39,16 @@ def InitTrainingRun():
     with open("output/whatever0/results.json", "r") as file:
         data = json.load(file)
 
-    psnr = data["ours_%d" % (iteration_step)]["PSNR"]
+    psnr = data[f"ours_{iteration_step}"]["PSNR"]
 
-    gaussian_count = plyextract.get_vertex_count("output/whatever0/point_cloud/iteration_%d/point_cloud.ply" % (iteration_step))
+    gaussian_count = plyextract.get_vertex_count(f"output/whatever0/point_cloud/iteration_{iteration_step}/point_cloud.ply")
 
     count_and_psnr[scene_dir].append((gaussian_count, psnr))
     return
 
 for scene_dir in scenes:
+
+    print(f"\nOn scene {scene_dir}\n")
     
     count_and_psnr[scene_dir] = []
 
@@ -53,6 +56,7 @@ for scene_dir in scenes:
     checkpoint = 1
 
     for iter in range(iteration_step, max_iteration, iteration_step):
+
         subprocess.run([sys.executable,
                         "train.py", 
                         "--model_path", "output/whatever%d" % (checkpoint),
@@ -71,7 +75,7 @@ for scene_dir in scenes:
         
         subprocess.run([sys.executable,
                         "metrics.py", 
-                        "-m", "output/whatever%d" % checkpoint,])
+                        "-m", "output/whatever%d" % checkpoint])
         
         with open("output/whatever%d/results.json" % checkpoint, "r") as file:
             data = json.load(file)
@@ -85,5 +89,13 @@ for scene_dir in scenes:
         checkpoint+=1
 
     print(f"{scene_dir}: count_and_psnr = {count_and_psnr[scene_dir]}")
+    
     shutil.rmtree("output/whatever%d/" % (checkpoint-1))
+
+
+
+with open("data.pkl", "wb") as file:
+    pickle.dump(count_and_psnr, file)
+
+
 
