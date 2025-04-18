@@ -38,14 +38,14 @@ class Heatmap:
 def main():
     # Run 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgomp.so.1'
     # Before running this script
-    pred_path = '/home/kth/KeX/output/40f87ad8-9/train/ours_1500/renders/00006.png'
+    pred_path = './output/40f87ad8-9/train/ours_1500/renders/00006.png'
     gt_path   = pred_path.replace('renders', 'gt')
     gt = np.array(Image.open(gt_path).convert('RGB'))
     pred = np.array(Image.open(pred_path).convert('RGB'))
 
     hm = Heatmap(chunk_size=8)
     hm.create_heatmap(gt, pred)
-    hm.plot('/home/kth/KeX/output/40f87ad8-9/train/ours_1500/heatmap.png')
+    hm.plot(pred_path.replace('renders/', 'heatmap_'))
 
 if __name__ == "__main__":
     main()
