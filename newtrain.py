@@ -8,15 +8,14 @@ import pickle
 
 
 iteration_step = 100
-max_iteration = 200
+max_iteration = 4000
 del_last_checkpoint = True
 del_final_model = True
 
 count_and_psnr = {}
 
 scenes = [
-    "tandt_db/tandt/truck/",
-    "tandt_db/tandt/train",
+    "tandt_db\db\playroom",
 ]
 
 def InitTrainingRun():
@@ -47,25 +46,31 @@ def InitTrainingRun():
     count_and_psnr[scene_dir].append((gaussian_count, psnr))
     return
 
+
 for scene_dir in scenes:
 
     print(f"\nOn scene {scene_dir}\n")
     
     count_and_psnr[scene_dir] = []
-
+    
+    
+    iteration_step = 100
     InitTrainingRun()
+    prev_iter = 100
+    next_iter = 200
+
     checkpoint = 1
-
-    for iter in range(iteration_step, max_iteration, iteration_step):
-
+    
+    while (next_iter < max_iteration):
+        
         subprocess.run([sys.executable,
                         "train.py", 
                         "--model_path", "output/whatever%d" % (checkpoint),
                         "-s", scene_dir,
                         "--eval",
-                        "--start_checkpoint", "output/whatever%d/chkpnt%d.pth" % (checkpoint-1, iter),
-                        "--iterations", "%d" % (iter+iteration_step), 
-                        "--checkpoint_iterations", "%d" % (iter+iteration_step),])
+                        "--start_checkpoint", "output/whatever%d/chkpnt%d.pth" % (checkpoint-1, prev_iter),
+                        "--iterations", "%d" % (next_iter), 
+                        "--checkpoint_iterations", "%d" % (next_iter),])
         
         if (del_last_checkpoint):
             shutil.rmtree("output/whatever%d/" % (checkpoint-1))
@@ -82,20 +87,22 @@ for scene_dir in scenes:
         with open("output/whatever%d/results.json" % checkpoint, "r") as file:
             data = json.load(file)
 
-        psnr = data["ours_%d" % (iter+iteration_step)]["PSNR"]
+        psnr = data["ours_%d" % (next_iter)]["PSNR"]
 
-        gaussian_count = plyextract.get_vertex_count("output/whatever%d/point_cloud/iteration_%d/point_cloud.ply" % (checkpoint, iter+iteration_step))
+        gaussian_count = plyextract.get_vertex_count("output/whatever%d/point_cloud/iteration_%d/point_cloud.ply" % (checkpoint, next_iter))
 
         count_and_psnr[scene_dir].append((gaussian_count, psnr))
 
         checkpoint+=1
+        iteration_step *= 1.2
+        iteration_step = int(iteration_step)
+        prev_iter = next_iter
+        next_iter += iteration_step
 
     print(f"{scene_dir}: count_and_psnr = {count_and_psnr[scene_dir]}")
     
     if (del_last_checkpoint):
         shutil.rmtree("output/whatever%d/" % (checkpoint-1))
-
-
 
 with open("data.pkl", "wb") as file:
     pickle.dump(count_and_psnr, file)

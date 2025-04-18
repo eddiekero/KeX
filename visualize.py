@@ -1,29 +1,33 @@
 import json
 import matplotlib.pyplot as plt
 import plyextract
+from pathlib import Path
 
 import pickle
 
 # Plot the data
 plt.figure(figsize=(8, 5))
 
-# Read JSON data from a file
 
-# To read it back
-with open("data.pkl", "rb") as file:
-    loaded_dict = pickle.load(file)
+directory = Path('D:\Dev\KeX\importantdata')
+print("got somewhere")
+for filepath in directory.glob('*.pkl'):
+    print(filepath)
+    with open(filepath, "rb") as file:
+        loaded_dict = pickle.load(file)
 
+    print(loaded_dict)
 
-for key in loaded_dict.keys():
-    # Extract X and Y values
-    x_values, y_values = zip(*loaded_dict[key])
+    for key in loaded_dict.keys():
+        # Extract X and Y values
+        x_values, y_values = zip(*loaded_dict[key])
 
-    # Sort values for correct plotting order
-    sorted_indices = sorted(range(len(x_values)), key=lambda i: x_values[i])
-    x_values = [x_values[i] for i in sorted_indices]
-    y_values = [y_values[i] for i in sorted_indices]
+        # Sort values for correct plotting order
+        sorted_indices = sorted(range(len(x_values)), key=lambda i: x_values[i])
+        x_values = [x_values[i] for i in sorted_indices]
+        y_values = [y_values[i] for i in sorted_indices]
 
-    plt.plot(x_values, y_values, marker='o', linestyle='-', color='b', label='Train')
+        plt.plot(x_values, y_values, marker='o',label=f'{filepath}')
 
 #############################################
 # with open("output/truck4000/results.json", "r") as file:
@@ -49,7 +53,7 @@ for key in loaded_dict.keys():
 # plt.plot(x_values, y_values, marker='o', linestyle='-', color='r', label='Truck')
 plt.xlabel("#Gaussians")
 plt.ylabel("PSNR")
-plt.title("combined truck and train")
+plt.title("Multi")
 plt.legend()
 plt.grid(True)
 plt.savefig("plot")
