@@ -1,0 +1,6 @@
+100
+200
+320
+
+iteration_step *= 1.2
+current_iter += iteration_step
