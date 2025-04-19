@@ -24,6 +24,7 @@ def InitTrainingRun():
                         "--model_path", "output/whatever0",
                         "-s", scene_dir,
                         "--eval",
+                        "--optimizer_type", "sparse_adam",
                         "--iterations", f"{iteration_step}", 
                         "--checkpoint_iterations", f"{iteration_step}",])
     
@@ -68,6 +69,7 @@ for scene_dir in scenes:
                         "--model_path", "output/whatever%d" % (checkpoint),
                         "-s", scene_dir,
                         "--eval",
+                        "--optimizer_type", "sparse_adam",
                         "--start_checkpoint", "output/whatever%d/chkpnt%d.pth" % (checkpoint-1, prev_iter),
                         "--iterations", "%d" % (next_iter), 
                         "--checkpoint_iterations", "%d" % (next_iter),])

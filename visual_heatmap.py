@@ -38,7 +38,7 @@ class Heatmap:
 def main():
     # Run 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgomp.so.1'
     # Before running this script
-    pred_path = './output/40f87ad8-9/train/ours_1500/renders/00006.png'
+    pred_path = 'output/whatever1/test/ours_2500/renders/00030.png'
     gt_path   = pred_path.replace('renders', 'gt')
     gt = np.array(Image.open(gt_path).convert('RGB'))
     pred = np.array(Image.open(pred_path).convert('RGB'))
