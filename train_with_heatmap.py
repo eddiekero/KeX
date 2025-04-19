@@ -10,7 +10,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 iterations = [100, 2500, 5000]
-doTrain = False
+doTrain = True
 del_last_checkpoint = False
 del_final_model = False
 
