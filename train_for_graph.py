@@ -9,6 +9,7 @@ import pickle
 
 iteration_step = 100
 max_iteration = 4000
+max_gaussian_count = 750000
 del_last_checkpoint = True
 del_final_model = True
 
@@ -57,12 +58,14 @@ for scene_dir in scenes:
     
     iteration_step = 100
     InitTrainingRun()
+    gaussian_count = plyextract.get_vertex_count("output/whatever0/point_cloud/iteration_100/point_cloud.ply")
+
     prev_iter = 100
     next_iter = 200
 
     checkpoint = 1
     
-    while (next_iter < max_iteration):
+    while (next_iter < max_iteration ):
         
         subprocess.run([sys.executable,
                         "train.py", 
