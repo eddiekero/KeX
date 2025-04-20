@@ -128,7 +128,7 @@ for scene in scenes:
     print(mses)
     
     if (top5Truebot5False):
-        top5 = np.argsort(mses)[:5][::-1] # Indices of 5 largest numbers, in descending order
+        top5 = np.argsort(mses)[:5][::-1] # Indices of 5 smallest numbers, in descending order
     else:
         top5 = np.argsort(mses)[-5:][::-1] # Indices of 5 largest numbers, in descending order
     print(top5)
