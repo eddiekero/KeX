@@ -20,7 +20,7 @@ class Heatmap:
             for x in range(0, w, cw):
                 gt_chunk = gt[y:y+ch, x:x+cw]
                 pred_chunk = pred[y:y+ch, x:x+cw]
-                mse_value = self.mse(gt_chunk, pred_chunk)
+                mse_value = np.mean((gt_chunk - pred_chunk)**2)#self.mse(gt_chunk, pred_chunk) 
                 self.heatmap[y//self.chunk_size].append(mse_value)
         
         
