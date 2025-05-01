@@ -27,7 +27,8 @@ for filepath in directory.glob('*.pkl'):
         x_values = [x_values[i] for i in sorted_indices]
         y_values = [y_values[i] for i in sorted_indices]
 
-        plt.plot(x_values, y_values, marker='o',label=f'{filepath}')
+        name = str(filepath).split("\\")[4][:-8]
+        plt.plot(x_values, y_values, marker='o',label=f'{name}')
 
 #############################################
 # with open("output/truck4000/results.json", "r") as file:
@@ -51,9 +52,10 @@ for filepath in directory.glob('*.pkl'):
 
 
 # plt.plot(x_values, y_values, marker='o', linestyle='-', color='r', label='Truck')
+plt.xlim(0, 420000)
 plt.xlabel("#Gaussians")
 plt.ylabel("PSNR")
-plt.title("Multi")
+#plt.title("Multi")
 plt.legend()
 plt.grid(True)
 plt.savefig("plot")

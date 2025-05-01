@@ -65,7 +65,7 @@ for scene_dir in scenes:
 
     checkpoint = 1
     
-    while (next_iter < max_iteration ):
+    while (next_iter < max_iteration):
         
         subprocess.run([sys.executable,
                         "train.py", 

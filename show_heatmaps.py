@@ -4,7 +4,7 @@ import numpy as np
 import visual_heatmap
 import matplotlib.pyplot as plt
 
-name = "train"
+name = "truck"
 with open(f"output/{name}.pkl", "rb") as file:
     loaded_dict = pickle.load(file)
 rendered_iterations = loaded_dict['rendered_iterations'] 
@@ -14,16 +14,19 @@ max_iter = rendered_iterations[-1]
 
 mses = []
 for i in range(37):
+    try:
+        pred_path = f'./output/{name}{max_iter}/test/ours_{max_iter}/renders/{str(i).zfill(5)}.png'
 
-    pred_path = f'./output/{name}{max_iter}/test/ours_{max_iter}/renders/{str(i).zfill(5)}.png'
+        gt_path   = pred_path.replace('renders', 'gt')
+        gt = np.array(Image.open(gt_path).convert('RGB'))
 
-    gt_path   = pred_path.replace('renders', 'gt')
-    gt = np.array(Image.open(gt_path).convert('RGB'))
+        pred = np.array(Image.open(pred_path).convert('RGB'))
 
-    pred = np.array(Image.open(pred_path).convert('RGB'))
-
-    me = np.mean((gt - pred)**2)
-    mses.append(me)
+        me = np.mean((gt - pred)**2)
+        mses.append(me)
+    except:
+        print(f"couldn't find rendered image at index {i}")
+        break
     
 
 best5 = np.argsort(mses)[:5][::-1] # Indices of 5 smallest numbers, in descending order
@@ -62,7 +65,7 @@ for angle in best5:
     images = gts + preds + heatmaps
 
     for i, count in enumerate(rendered_gaussian_counts):
-        axes[0, i].set_title(f"Gaussian_count: {count}", fontsize=10)
+        axes[0, i].set_title(f"GC: {count}", fontsize=8)
 
     for i, ax in enumerate(axes.flat):
         ax.imshow(images[i], cmap='hot', interpolation='nearest', vmin=0, vmax=160)  
@@ -106,7 +109,7 @@ for angle in worst5:
     images = gts + preds + heatmaps
 
     for i, count in enumerate(rendered_gaussian_counts):
-        axes[0, i].set_title(f"Gaussian_count: {count}")
+        axes[0, i].set_title(f"GC: {count}", fontsize=7)
 
 
     for i, ax in enumerate(axes.flat):
