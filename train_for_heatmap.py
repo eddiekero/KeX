@@ -27,20 +27,22 @@ target = 0
 
 
 # only use one scene for now
-scene = "tandt_db/tandt/train"
+scene = "datasets/stump"
 
 def InitTrainingRun(name):
     subprocess.run([sys.executable,
-                        "train.py", 
-                        "--model_path", f"output/{name}{iterations[0]}",
-                        "-s", scene,
-                        "--eval",
-                        "--optimizer_type", "sparse_adam", 
-                        "--iterations", f"{iterations[0]}", 
-                        "--checkpoint_iterations", f"{iterations[0]}",])
+                    "train.py", 
+                    "--model_path", f"output/{name}{iterations[0]}",
+                    "-s", scene,
+                    "--eval",
+                    "--iterations", f"{iterations[0]}", 
+                    "--checkpoint_iterations", f"{iterations[0]}",
+                    '-r', '4'])
+  
     return
 
 name = scene.split("/")[-1]
+
 
 InitTrainingRun(name)
 gaussian_count = plyextract.get_vertex_count(f"output/{name}{iterations[0]}/point_cloud/iteration_{init_train_iter}/point_cloud.ply")
@@ -53,10 +55,10 @@ while (target < len(gaussian_counts)):
                     "--model_path", f"output/{name}{iterations[checkpoint]}",
                     "-s", scene,
                     "--eval",
-                    "--optimizer_type", "sparse_adam",
                     "--start_checkpoint", f"output/{name}{iterations[checkpoint-1]}/chkpnt{iterations[checkpoint-1]}.pth",
                     "--iterations", f"{iterations[checkpoint]}", 
-                    "--checkpoint_iterations", f"{iterations[checkpoint]}",])
+                    "--checkpoint_iterations", f"{iterations[checkpoint]}",
+                    '-r', '4'])
     
     new_gaussian_count = plyextract.get_vertex_count(f"output/{name}{iterations[checkpoint]}/point_cloud/iteration_{iterations[checkpoint]}/point_cloud.ply")
     
