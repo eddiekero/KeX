@@ -8,11 +8,12 @@ import pickle
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import time
 
 #from skimage.metrics import structural_similarity as ssim
 
 
-gaussian_counts = [100000, 250000, 500000]
+gaussian_counts = [100000, 250000, 500000, 750000]
 
 init_train_iter = 100
 iterations = [init_train_iter]
@@ -26,8 +27,12 @@ all_gaussian_counts = []
 target = 0
 
 
+# Set the time limit (15 minutes = 900 seconds)
+TIME_LIMIT = 120 * 60
+start_time = time.time()
+
 # only use one scene for now
-scene = "datasets/stump"
+scene = "tandt_db/tandt/truck"
 
 def InitTrainingRun(name):
     subprocess.run([sys.executable,
@@ -50,6 +55,12 @@ all_gaussian_counts.append(gaussian_count)
 
 checkpoint = 1
 while (target < len(gaussian_counts)):
+    # Check elapsed time
+    elapsed_time = time.time() - start_time
+    if elapsed_time > TIME_LIMIT:
+        print("Time limit exceeded. Stopping.")
+        break
+
     subprocess.run([sys.executable,
                     "train.py", 
                     "--model_path", f"output/{name}{iterations[checkpoint]}",
@@ -86,10 +97,3 @@ save['rendered_iterations'] = rendered_iterations
 save['rendered_gaussian_counts'] = rendered_gaussian_counts
 with open(f"output/{name}.pkl", "wb") as file:
     pickle.dump(save, file)
-
-
-
-
-
-
-

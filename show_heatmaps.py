@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from skimage.metrics import structural_similarity as ssim
 from visual_heatmap import Heatmap
 
-name = "bicycle"
+name = "truck"
+
 with open(f"output/{name}.pkl", "rb") as file:
     loaded_dict = pickle.load(file)
 rendered_iterations = loaded_dict['rendered_iterations'] 
@@ -29,7 +30,7 @@ for img in test_set:
     # me = np.mean((gt - pred)**2)
     me = ssim(gt, pred, channel_axis=-1)
     mses.append(me)
-    
+
 
 best5 = np.argsort(mses)[:5][::-1] # Indices of 5 smallest numbers, in descending order
 
@@ -71,7 +72,6 @@ def plot_heatmaps(angle, gts, preds, heatmaps, rendered_gaussian_counts, output_
         axes[0, i].set_title(f"Gaussian count: {count}", fontsize=10)
         me = ssim(gts[i], preds[i], channel_axis=-1) if is_ssim else np.mean((gts[i] - preds[i])**2)
         axes[2, i].set_title(f'Avg. {"SSIM" if is_ssim else "MSE"}: {me:.3f}', fontsize=10)
-
     lim = (-1, 1) if is_ssim else (0, 160)
     for i, ax in enumerate(axes.flat):
         ax.imshow(images[i], cmap='hot', interpolation='nearest', vmin=lim[0], vmax=lim[1])  
