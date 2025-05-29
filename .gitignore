@@ -10,4 +10,7 @@ screenshots
 tandt_db/
 packages
 submodules
-datasets
+
+Mipnerf/
+dodo/
+oldscenes/
