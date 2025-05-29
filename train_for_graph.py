@@ -3,111 +3,103 @@ import subprocess
 import json
 import plyextract
 import shutil
-
+import os
 import pickle
 
-
-iteration_step = 100
-max_iteration = 4000
-max_gaussian_count = 750000
-del_last_checkpoint = True
-del_final_model = True
 
 count_and_psnr = {}
 
 scenes = [
-    "tandt_db\db\playroom",
+    "Mipnerf/bicycle",
+    "Mipnerf/bonsai",
+    "Mipnerf/counter",
+    "Mipnerf/garden",
 ]
 
-def InitTrainingRun():
+iterations = [100]
+iteration_step = 500
+for i in range(1, 50):
+    iterations.append(iterations[-1] + iteration_step)
+    iteration_step*=1.2
+    iteration_step = int(iteration_step)
+
+max_gaussian_count = 750000
+all_gaussian_counts = []
+
+def InitTrainingRun(scene, save_name):
     subprocess.run([sys.executable,
                         "train.py", 
-                        "--model_path", "output/whatever0",
-                        "-s", scene_dir,
+                        "--model_path", f"output/{save_name}{iterations[0]}",
+                        "-s", scene,
                         "--eval",
-                        "--optimizer_type", "sparse_adam",
-                        "--iterations", f"{iteration_step}", 
-                        "--checkpoint_iterations", f"{iteration_step}",])
-    
-    subprocess.run([sys.executable,
-                        "render.py", 
-                        "-m", "output/whatever0",
-                        "--skip_train",])
-        
-    subprocess.run([sys.executable,
-                    "metrics.py", 
-                    "-m", "output/whatever0",])
-    
-    with open("output/whatever0/results.json", "r") as file:
-        data = json.load(file)
-
-    psnr = data[f"ours_{iteration_step}"]["PSNR"]
-
-    gaussian_count = plyextract.get_vertex_count(f"output/whatever0/point_cloud/iteration_{iteration_step}/point_cloud.ply")
-
-    count_and_psnr[scene_dir].append((gaussian_count, psnr))
+                        "--optimizer_type", "sparse_adam", 
+                        "--iterations", f"{iterations[0]}", 
+                        "--checkpoint_iterations", f"{iterations[0]}",])
     return
 
 
 for scene_dir in scenes:
-
     print(f"\nOn scene {scene_dir}\n")
     
-    count_and_psnr[scene_dir] = []
-    
-    
-    iteration_step = 100
-    InitTrainingRun()
-    gaussian_count = plyextract.get_vertex_count("output/whatever0/point_cloud/iteration_100/point_cloud.ply")
+    save_name = scene_dir.split("/")[-1]
+    count_and_psnr[save_name] = []
 
-    prev_iter = 100
-    next_iter = 200
+    if not os.path.isdir(f"output/{save_name}{iterations[0]}"):
+        InitTrainingRun(scene_dir, save_name)
+    else:
+        print(f"Skipping training {save_name}{iterations[0]} since it already exists")
+
+    gaussian_count = plyextract.get_vertex_count(f"output/{save_name}{iterations[0]}/point_cloud/iteration_{iterations[0]}/point_cloud.ply")
+    all_gaussian_counts.append(gaussian_count)
+    
 
     checkpoint = 1
-    
-    while (next_iter < max_iteration):
-        
-        subprocess.run([sys.executable,
-                        "train.py", 
-                        "--model_path", "output/whatever%d" % (checkpoint),
-                        "-s", scene_dir,
-                        "--eval",
-                        "--optimizer_type", "sparse_adam",
-                        "--start_checkpoint", "output/whatever%d/chkpnt%d.pth" % (checkpoint-1, prev_iter),
-                        "--iterations", "%d" % (next_iter), 
-                        "--checkpoint_iterations", "%d" % (next_iter),])
-        
-        if (del_last_checkpoint):
-            shutil.rmtree("output/whatever%d/" % (checkpoint-1))
-        
-        subprocess.run([sys.executable,
-                        "render.py", 
-                        "-m", "output/whatever%d" % checkpoint,
-                        "--skip_train",])
-        
-        subprocess.run([sys.executable,
-                        "metrics.py", 
-                        "-m", "output/whatever%d" % checkpoint])
-        
-        with open("output/whatever%d/results.json" % checkpoint, "r") as file:
-            data = json.load(file)
+    while (gaussian_count < max_gaussian_count):
+        print(f"on checkpoint={checkpoint}")
 
-        psnr = data["ours_%d" % (next_iter)]["PSNR"]
+        if not os.path.isdir(f"output/{save_name}{iterations[checkpoint]}"):
+            subprocess.run([sys.executable,
+                            "train.py", 
+                            "--model_path", f"output/{save_name}{iterations[checkpoint]}",
+                            "-s", scene_dir,
+                            "--eval",
+                            "--optimizer_type", "sparse_adam",
+                            "--start_checkpoint", f"output/{save_name}{iterations[checkpoint-1]}/chkpnt{iterations[checkpoint-1]}.pth",
+                            "--iterations", f"{iterations[checkpoint]}", 
+                            "--checkpoint_iterations", f"{iterations[checkpoint]}"])
+        else:
+            print(f"Skipping training {save_name}{iterations[checkpoint]} since it already exists")
+        
+        # #shutil.rmtree(f"output/{save_name}{iterations[checkpoint-1]}/")
+        
+        # subprocess.run([sys.executable,
+        #                 "render.py", 
+        #                 "-m", f"output/{save_name}{iterations[checkpoint]}",
+        #                 "--skip_train",])
+        
+        # subprocess.run([sys.executable,
+        #                 "metrics.py", 
+        #                 "-m", f"output/{save_name}{iterations[checkpoint]}"])
+        
+        # with open(f"output/{save_name}{iterations[checkpoint]}/results.json", "r") as file:
+        #     data = json.load(file)
 
-        gaussian_count = plyextract.get_vertex_count("output/whatever%d/point_cloud/iteration_%d/point_cloud.ply" % (checkpoint, next_iter))
+        # psnr = data[f"ours_{iterations[checkpoint]}"]["PSNR"]
 
-        count_and_psnr[scene_dir].append((gaussian_count, psnr))
+        gaussian_count = plyextract.get_vertex_count(f"output/{save_name}{iterations[checkpoint]}/point_cloud/iteration_{iterations[checkpoint]}/point_cloud.ply")
+        all_gaussian_counts.append(gaussian_count)
+        
+        #print((gaussian_count, psnr))
+        print(gaussian_count)
+
+        #count_and_psnr[save_name].append((gaussian_count, psnr))
 
         checkpoint+=1
-        iteration_step *= 1.2
-        iteration_step = int(iteration_step)
-        prev_iter = next_iter
-        next_iter += iteration_step
 
-    print(f"{scene_dir}: count_and_psnr = {count_and_psnr[scene_dir]}")
-    
-    if (del_last_checkpoint):
-        shutil.rmtree("output/whatever%d/" % (checkpoint-1))
+    #print(f"{scene_dir}: count_and_psnr = {count_and_psnr[scene_dir]}")
+    print(all_gaussian_counts)
+    print(iterations[:checkpoint])
+    #shutil.rmtree(f"output/{save_name}{iterations[checkpoint-1]}/")
 
 with open("data.pkl", "wb") as file:
     pickle.dump(count_and_psnr, file)
